@@ -1,0 +1,172 @@
+<% content_for :title, "Sign up" %>
+<div id='main-content'>
+<nav style="box-shadow: none; background-color: transparent; position: absolute; top: 0; left: 0; right: 0; padding: 20px;">
+	<a href="/login" class="btn pink right waves-effect">Log in</a>
+</nav>
+	<div id="overlay" class="valign-wrapper hidden" style="width: 100%; height: 100%; position:fixed; z-index:999; background-color: rgba(0,0,0,0.8);">
+		<div id="progressbar" class="preloader-wrapper big active" style="margin: auto;">
+		    <div class="spinner-layer spinner-blue-only">
+		      	<div class="circle-clipper left">
+		        	<div class="circle"></div>
+		      	</div>
+		      	<div class="gap-patch">
+		        	<div class="circle"></div>
+		      	</div>
+		      	<div class="circle-clipper right">
+		        	<div class="circle"></div>
+		    	</div>
+			</div>
+		</div>
+	</div>
+<div class="container">
+	<div class="valign-wrapper" style="height: 100vh; width: 100%;">
+		<div class="row" style="width: 100%;margin: 0;">
+			<div class="col s12 m8 l6 offset-m2 offset-l3" style="margin-top:5%; margin-bottom:5%;">
+				<a href="/"><img src="<%= asset_path('banner.png') %>" class="responsive-img"/></a>
+			</div>
+			<div id="form-container">
+				<div class="col s12  m8 l6 offset-m2 offset-l3">
+					<div class="card darkgrey" style="overflow: visible;">
+						<div class="card-content">
+							<%= form_tag('/signup', method: :post, :id => "signup-form") do %>
+								<div class="row">
+									<div class="col s12 input-field">
+										<label for="username">Username</label>
+										<input id="username" type="text" name="username" class="grey-text text-lighten-1"/>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col s12 input-field">
+										<label for="password">Password</label>
+										<input id="password" type="password" name="password" class="grey-text text-lighten-1"/>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col s12 input-field">
+										<label for="repassword">Confirm password</label>
+										<input id="repassword" type="password" name="repassword" class="grey-text text-lighten-1"/>
+									</div>
+								</div>
+								<input id="submit" type="submit" class="hidden"/>
+							<% end %>
+						</div>
+					</div>
+				</div>
+				<div class="col s12 center-align" style="position: relative; width: 100%; margin: 0; transform: translateY(-55%);">
+					<a id="dummy-submit" href="#" class="btn-large btn-floating pink waves-effect tooltipped" data-tooltip="Sign up" data-position="top" onclick="$('#submit').click();"><i class="mdi-action-done"></i></a>
+				</div>
+			</div>
+		</div>
+		<div id="progressbar" class="preloader-wrapper big" style="position:fixed;">
+		    <div class="spinner-layer spinner-blue-only">
+		      	<div class="circle-clipper left">
+		        	<div class="circle"></div>
+		      	</div>
+		      	<div class="gap-patch">
+		        	<div class="circle"></div>
+		      	</div>
+		      	<div class="circle-clipper right">
+		        	<div class="circle"></div>
+		    	</div>
+			</div>
+		</div>
+	</div>
+</div>
+</div>
+<script>
+	$(document).ready(function(){
+		$(".tooltipped").tooltip({
+			delay: 50
+		});
+
+		$("#signup-form").validate({
+			errorClass: "invalid",
+			validClass: "valid",
+			debug: true,
+			errorElement: "span",
+			rules:{
+				username: {
+					required: true,
+					minlength: 6
+				},
+				password: {
+					required: true,
+					minlength: 6
+				},
+				repassword: {
+					required: true,
+					equalTo: "#password"
+				}
+			},
+			messages: {
+				username: {
+					required: "You must provide a username",
+					minlength: "Your username must be at least 6 characters long"
+				},
+				password: {
+					required: "You must provide a password",
+					minlength: "Your password must be at least 6 characters long"
+				},
+				repassword: {
+					required: "You must re-enter your password",
+					equalTo: "Passwords do not match"
+				}
+			},
+			submitHandler: function(form){
+				hideForm();
+				$.ajax({
+					url: $(form).attr("action"),
+					data: $(form).serialize(),
+					dataType: "json",
+					type: "post",
+					success: function(data, textStatus, jqXHR){
+						if(data.status == 1){
+							toast("The username you entered is already taken", 5000, "red");
+							$("#username").addClass("invalid");
+						} else{
+							var welcome = $('<div class="hidden" style="position: absolute;">' + 
+								'<h1 class="pink-text" style="font-weight: lighter;">Welcome to RubyMusic, ' + data.username + '</h1></div>');
+							welcome.appendTo($("body"));
+							welcome.css({
+								left: $(window).width() / 2 - parseInt(welcome.css("width").replace("px", "")) / 2,
+								top: $(window).height() / 2 - parseInt(welcome.css("height").replace("px", "")) / 2
+							});
+							switchVisibility(welcome, $("#main-content"), 1000);
+							setTimeout(function(){
+								location.assign("/dashboard");
+							}, 1000);
+						}
+
+					},
+					error: function(jqXHR, textStatus, errorThrown){
+						console.log(textStatus);
+						toast("An unknown problem was encountered while trying to sign up", 5000, "orange");
+					},
+					complete: function(){
+						showForm();
+					}
+				});
+			}
+		});
+	});
+
+	function hideForm(){
+		$("#overlay").removeClass("hidden");
+		$("#overlay").fadeIn(500);
+	}
+
+	function showForm(){
+		$("#overlay").fadeOut(500);//addClass("hidden");
+	}
+
+	function switchVisibility(fadeIn, fadeOut, duration){
+		fadeOut.animate({
+			opacity: 0
+		}, duration, function(){
+			fadeOut.css("visibility", "hidden");
+			fadeIn.css("visibility", "visible").animate({
+				opacity: 1
+			}, duration);
+		});
+	}
+</script>

@@ -1,0 +1,529 @@
+<% content_for :title, @playlist_title %>
+<ul id="side-nav" class="side-nav grey darken-4" style="padding-top: 65px;">
+    <li class='bold-text'><a href="/dashboard" class="white-text">Dashboard</a></li>
+    <li class='bold-text'><a href="/playlist?id=<%= @user_library %>" class="white-text">My Library</a></li>
+    <li class='bold-text'><a href="/my_playlists" class="white-text">My Playlists</a></li>
+    <li class="li-divider" style="padding:0;"></li>
+    <li><a href="/logout" class="white-text">Log out</a></li>
+</ul>
+<div class="navbar-fixed" style="z-index: 1000">
+	<nav class='pink' style="padding-left: 15px; padding-right: 15px;">
+		<a id='playlist-trigger' href="#" data-activates="playlist-queue" class="black-text button-collapse hide-on-large-only"><i class="mdi-av-queue-music"></i></a>
+		<a href="#" class="center brand-logo grey-text text-darken-4">
+			<i class="mdi-hardware-headset" style="position: relative; top: 50%; transform: translateY(-50%);"></i> <%= @playlist_title %>
+		</a>
+		<a href="#" id="sidenav-trigger" data-activates="side-nav" class="right black-text button-collapse show-on-large"><i class="mdi-navigation-menu"></i></a>
+</div>
+<ul id="playlist-queue" class="grey darken-3 side-nav fixed" style='padding-bottom:40px;'>
+	<% if @playlist[:tracks].size == 0 %>
+		<li id="playlist-queue-placeholder">
+			<a href="#add-songs-dialog" class='add-songs-trigger grey-text text-darken-2 bold-text' style='height: 100%; width:100%; display: table-cell; vertical-align: middle;'>
+				<span style="position:relative; top: 50%; translateY(-50%);">Add songs</span> <i class="mdi-av-playlist-add large left"></i>
+			</a>
+		</li>
+	<% end %>
+	<% @playlist[:tracks].each do |music| %>
+		<li class='waves-effect' style='display: block;' onclick='play(this)' data-duration="<%= music[:duration] %>">
+			<div>
+				<p class="white-text bold-text no-margin" style='line-height: 2rem;'><%= music[:title] %></p>
+				<p class="grey-text text-lighten-1 no-margin" style='line-height: 1rem;'><%= music[:artist][:name] %></p>
+			</div>
+		</li>
+	<% end %>
+	<li>
+		<a href="#add-songs-dialog" class="add-songs-trigger grey-text text-lighten-1" style="width: 100%; height: 100%;">
+			Add songs <i class="mdi-av-playlist-add left"></i>
+		</a>
+	</li>
+</ul>
+<main style='height: 100vh;'>
+	<div class="row">
+		<img id="song-art" style='width: 100%; height: auto;'/>
+		<div id="player"></div>
+	</div>
+	<div id='player-controls' class="center-align no-margin" style="background-color: rgba(0,0,0,0.75);">
+		<div class="row">
+			<div class="col s12">
+				<h5 id="current-track-title" class="pink-text"></h5>
+			</div>
+			<div class="col s12 m6">
+				<p id="artist" class="grey-text text-lighten-2 no-margin"></p>
+			</div>
+			<div class="col s12 m6">
+				<p id="album" class="grey-text text-lighten-2 no-margin"></p>
+			</div>
+		</div>
+		<div id="track-slider" style="margin-bottom: 10px;"></div>
+		<div class="row no-margin">
+			<span id="current-time" class="left grey-text text-lighten-2"></span>
+			<span id="total-time" class="right grey-text text-lighten-2"></span>
+		</div>
+		<div class='row' style="height: 50px;">
+			<div class="col s3 m1" style="height: 100%;">
+				<a id="toggle-sound" href="#" class="tooltipped waves-effect btn-flat white-text" style="position: relative; top: 50%; transform: translateY(-50%);" data-tooltip="mute" data-position="top"><i class='mdi-av-volume-up'></i></a>
+			</div>
+			<div class="col s9 m2" style="height: 100%;">
+				<div id="volume-slider" style="top: 50%; transform: translateY(-50%);"></div>
+			</div>
+			<div class="col s12 m6">
+				<a href="#" class="waves-effect btn-flat no-margin tooltipped" style="margin: 0 10px" onclick="prevTrack();" data-tooltip="previous" data-position="top"><i class="mdi-av-skip-previous white-text"></i></a>
+				<a id="play-pause" href="#" class="waves-effect btn-floating btn-large no-margin tooltipped" data-tooltip="play"  data-position="top"><i class="mdi-av-play-arrow"></i></a>
+				<a href="#" class="waves-effect btn-flat no-margin tooltipped" style="margin: 0 10px" onclick="nextTrack();" data-tooltip="next" data-position="top"><i class="mdi-av-skip-next white-text"></i></a>
+			</div>
+			<div class="col s12 m3"></div>
+		</div>
+	</div>
+</main>
+<div id="add-songs-dialog" class="grey darken-3 modal modal-fixed-footer" style="height: 280px;">
+    <div class="modal-content">
+    	<div class="row">
+    		<div class="col s12">
+    			<h5 class="pink-text" style="font-weight: bold;">Add songs to playlist</h5>		
+    		</div>
+    	</div>
+    	<div class="row center-align" style="margin-top:50px;">
+    		<a href="#library-dialog" id="library-dialog-trigger" class="btn">Choose from library</a>
+    		<a href="#upload-dialog" id="upload-dialog-trigger" class="btn">Upload new songs</a>
+    	</div>
+    </div>
+    <div class="modal-footer right-align grey darken-4">
+    	<a href="#" class="grey-text text-lighten-3 waves-effect btn-flat modal-action" onclick="$('#add-songs-dialog').closeModal()">Cancel</a>
+    </div>
+</div>
+<div id="upload-dialog" class="grey darken-3 modal modal-fixed-footer">
+		<div id="upload-placeholder" class="valign-wrapper center-align" style="width: 100%; height: 100%; position: absolute;">
+		<i class="large mdi-av-my-library-music grey-text text-darken-2" style="margin:auto;"></i>
+	</div>
+    <div class="modal-content">
+    	<div class="row">
+    		<div class="col s12">
+    			<h5 class="pink-text" style="font-weight: bold;">Add music to playlist</h5>		
+    		</div>
+    	</div>
+    	<div class="row">
+    		<div class="col s12">
+		      	<ul id="upload-list">
+		      	</ul>		
+    		</div>
+    	</div>
+    	<form id="fileupload" enctype="multipart/form-data">
+      		<input id="hidden-fileinput" type="file" name="file" class="hidden" multiple/>
+      		<input type="hidden" name="playlist_id" value="<%= @playlist[:id] %>"/>
+      	</form>
+    </div>
+    <div class="modal-footer right-align grey darken-4">
+    	<a href="#" class="grey-text text-lighten-3 waves-effect btn-flat modal-action" onclick="$('#upload-dialog').closeModal();">done</a>
+    	<a href="#" onclick="$('#hidden-fileinput').click();" class="btn waves-effect modal-action">Add <i class="mdi-editor-attach-file right"></i></a>
+    </div>
+</div>
+<div id="library-dialog" class="grey darken-3 modal modal-fixed-footer">
+    <div class="modal-content">
+    	<div class="row">
+    		<div class="col s12">
+    			<h5 class="pink-text" style="font-weight: bold;">Add music to playlist</h5>		
+    		</div>
+    	</div>
+    	<div class="row">
+    		<div class="col s12">
+		      	<ul id="library-tracks">
+		      	</ul>
+    		</div>
+    	</div>
+    </div>
+    <div class="modal-footer right-align grey darken-4">
+    	<a href="#" class="grey-text text-lighten-3 waves-effect btn-flat modal-action modal-close">close</a>
+    	<a href="#" id="add-songs-from-library" class="btn waves-effect modal-action">Add</a>
+    </div>
+</div>
+<script>
+	var playlist = <%= @tracks %>
+	var currentMusic = <%= @listen_to %>;
+	var player;
+	var playPauseBehavior;
+	var mute = false;
+	var currentVolume = 100;
+	var isSliding = false;
+
+	function play(element){
+		var index = $("#playlist-queue li").index(element);
+		playMusic(index);
+	}
+
+	function updateVolumeToggle(){
+		if(mute){
+			$("#toggle-sound").find("i")
+				.addClass("mdi-av-volume-off")
+				.removeClass("mdi-av-volume-up")
+				.attr("data-tooltip", "unmute");
+
+		}
+		else{
+			$("#toggle-sound").find("i")
+				.addClass("mdi-av-volume-up")
+				.removeClass("mdi-av-volume-off")
+				.attr("data-tooltip", "mute");
+		}
+	}
+
+	$(document).ready(function(){
+		console.log("playlist:");
+		for (var i = 0; i < playlist.length; i++){
+			console.log(playlist[i].title);
+		}
+
+		$("#playlist-queue").sortable({
+			items: "li:not(li:last-child)",
+			axis: "y",
+			placeholder: "sortable-placeholder",
+			start: function(event, ui){
+				var initial = $("#playlist-queue li").index(ui.item);
+				$(ui.item).attr("data-initial", initial);
+			},
+			stop: function(event, ui){
+				var finalIndex = $("#playlist-queue li").index(ui.item);
+				var initialIndex = parseInt($(ui.item).attr("data-initial"));
+				var draggedMusic = playlist[initialIndex];
+				console.log("initial index: " + initialIndex + " final index: " + finalIndex);
+				if(initialIndex > finalIndex){
+
+					for(var i = initialIndex; i > finalIndex; i--){
+						console.log(playlist[i - 1].title + " moved to " + i);
+						playlist[i] = playlist[i - 1];
+					}
+				} else if (initialIndex < finalIndex){
+
+					for(var i = initialIndex; i < finalIndex; i++){
+						console.log(playlist[i + 1].title + " moved to " + i);
+						playlist[i] = playlist[i + 1];
+					}	
+				}
+				playlist[finalIndex] = draggedMusic;
+				if(initialIndex == currentMusic)
+					currentMusic = finalIndex;
+				else if(finalIndex <= currentMusic && currentMusic < initialIndex)
+					currentMusic++;
+				else if(finalIndex >= currentMusic && currentMusic > initialIndex)
+					currentMusic--;
+				console.log("current music: " + currentMusic);
+				console.log("dragged music: " + playlist[finalIndex].title);
+				$(ui.item).attr("data-initial", "");
+			}
+		});
+
+		$("#add-songs-from-library").click(function(){
+			var ids = [];
+			$("#library-tracks li input[type='checkbox']:checked").each(function(index, element){
+				ids.push($(this).attr("data-id"));
+			});
+			$.ajax({
+				url: "/add_to_playlist",
+				type: "post",
+				data: "ids=" + ids + "&playlist=" + <%= @playlist[:id] %>,
+				dataType: "json",
+				success: function(data, textStatus, jqXHR){
+					if(data.status == 0){
+						var songs = data.songs;
+						$("#playlist-queue-placeholder").remove();
+						for(var i = 0; i < songs.length; i++){
+							var song = songs[i];
+							playlist.push(song);
+							var newRow = $("<li class='waves-effect' style='display: block;' onclick='play(this)'>" +
+								"<div>" +
+									"<p class='white-text bold-text no-margin' style='line-height: 2rem;'>" + song.title + "</p>" +
+									"<p class='grey-text text-lighten-1 no-margin' style='line-height: 1rem;'>" + song.artist.name + "</p>" +
+								"</div></li>");
+							$("#playlist-queue li:last-child").before(newRow);
+						}
+						$("#library-dialog").closeModal();
+						$("#add-songs-dialog").closeModal();
+					}
+				}
+			})
+		});
+
+		$("#fileupload").fileupload({
+			url: "/dashboard/upload",
+			type: "post",
+			dataType: "json",
+			acceptFileTypes: '/(\.|\/)(mp3|ogg|wav)$/i',
+			sequentialUploads: true,
+			add: function(e, data){
+				
+				if(!$("#upload-placeholder").hasClass("hidden"))
+					$("#upload-placeholder").addClass("hidden");
+				var filename = data.files[0].name;
+				var filesize = formatFileSize(data.files[0].size);
+
+				var newRow = $("<li style='padding-bottom: 15px'><p class='grey-text text-lighten-3'>" + filename + " (" + filesize + ")</p>" + 
+					"<div class='progress'><div class='determinate' style='width: 0%'></div></div></li>");
+				
+				$("#upload-list").append(newRow);
+				data.files[0].row = newRow;
+				e.context = newRow;
+				var jqXHR = data.submit()
+						.success(function(result, textStatus, jqXHR){
+							console.log(result);
+						})
+						.fail(function(jqXHR, textStatus, errorThrown){
+						console.log(textStatus);
+						})
+						.progress(function(e, data){
+							console.log(data);
+						});
+			},
+			progress: function(e, data){
+
+				var progress = parseInt(data.loaded / data.total * 100, 10);
+				var row = data.files[0].row;
+				row.find(".determinate").css("width", progress + "%");
+			},
+			always: function(e, data){
+
+				var result = data.result;
+				var row = data.files[0].row;
+				if(result.status == 0){
+					$("#playlist-queue-placeholder").remove();
+					row.find(".progress").addClass("success");
+					var song = result.song;
+					playlist.push(song);
+					var newRow = $("<li class='waves-effect' style='display: block;' onclick='play(this)'>" +
+						"<div>" +
+							"<p class='white-text bold-text no-margin' style='line-height: 2rem;'>" + song.title + "</p>" +
+							"<p class='grey-text text-lighten-1 no-margin' style='line-height: 1rem;'>" + song.artist.name + "</p>" +
+						"</div></li>");
+					$("#playlist-queue li:last-child").before(newRow);
+				}
+				else{
+					row.find(".progress").addClass("fail");
+					if(typeof result.error !== "undefined"){
+						row.append($("<span class='red-text' style='margin-bottom: 5px;font-weight:bold;font-size:0.9rem;'>" + result.error + "</span>"));
+					}
+				}
+			}
+		});
+
+		$(".tooltipped").tooltip({
+			delay: 50
+		});
+
+		$("#playlist-trigger").sideNav({
+			menuWidth: 350
+		});
+
+		$("#sidenav-trigger").sideNav({
+			edge: "right"
+		});
+
+		$(".add-songs-trigger").leanModal();
+
+		$("#upload-dialog-trigger").click(function(){
+			$("#add-songs-dialog").closeModal();
+			$("#upload-list").empty(); 
+			$("#upload-placeholder").removeClass("hidden");
+			$("#upload-dialog").openModal();
+		});
+
+		$("#library-dialog-trigger").leanModal({
+			ready: function(){
+				$("#library-tracks").empty();
+				$.ajax({
+					url: "/get_songs",
+					type: "get",
+					success: function(data, textStatus, jqXHR){
+						console.log(data);
+						if(status == 0){
+							var songs = data.library;
+							console.log(songs);
+							if(songs.length > 0){
+								for(var i = 0; i < songs.length; i++){
+									var id = songs[i].id;
+									var title = songs[i].title;
+									console.log(songs[i] + " " + title);
+									var artist = songs[i].artist["name"];
+									var newRow = 
+										$("<li style='padding-bottom: 15px; padding-top: 15px;'>" + 
+										"<div class='row'>" +
+										"<div class='col s2'>" + 
+										"<input type='checkbox' id='song" + id + "' data-id='" + id + "'/>" + 
+										"<label for='song" + id + "'></label>" +
+										"</div>" +
+										"<div class='col s10'>" + 
+										"<p class='grey-text text-lighten-3 no-margin'>" + title + "</p>" +
+										"<p class='grey-text text-lighten-1 no-margin'>" + artist + "</p>" +
+										"</div></div></li>");
+									$("#library-tracks").append(newRow);
+								}
+							}
+						}
+					}
+				})
+			}
+		});
+
+		player = $("#player").jPlayer({
+			ready: function(){
+				if(playlist.length > 0){
+					playMusic(currentMusic);
+					playPauseBehavior = doPause;
+				}
+			},
+			volume: 1,
+			swfPath: "/jquery.jplayer.swf",
+			timeupdate: function(event) { 
+				if(!isSliding)
+				    $("#track-slider").slider({
+				    	value: event.jPlayer.status.currentTime
+				    });
+				$("#current-time").text($.jPlayer.convertTime(event.jPlayer.status.currentTime));
+		   },
+		   ended: function(){
+		   		console.log("ended");
+		   		var index = currentMusic + 1
+		   		if(index >= playlist.length)
+		   			index = 0;
+		   		playMusic(index);
+		   		if(index == 0)
+		   			$("#play-pause").click();
+		   },
+		   preload: "auto"
+		});	
+
+		$("#track-slider").slider({
+			range: "max",
+			min: 0,
+			max: 100,
+			value: 0,
+			stop: function(ui, event){
+				if(playlist.length == 0)
+					$("#track-slider").slider({value: 0});
+			}
+		});
+
+		$("#volume-slider").slider({
+			range: "max",
+			min: 0,
+			max: 100,
+			value: 100,
+			slide: function(event, ui){
+				currentVolume = ui.value;
+				player.jPlayer("volume", currentVolume / 100);
+				if(currentVolume == 0)
+					mute = true
+				else mute = false;
+				updateVolumeToggle();
+			}
+		})
+
+
+		$("#play-pause").click(function(){
+			if(playlist.length > 0)
+				playPauseBehavior();
+		});
+
+		$("#toggle-sound").click(function(){
+			if(mute){
+				$(this).find("i")
+					.removeClass("mdi-av-volume-off")
+					.addClass("mdi-av-volume-up");
+				if(currentVolume == 0)
+					currentVolume = 100;
+				$("#volume-slider").slider({value: currentVolume});
+				player.jPlayer("volume", currentVolume);
+				$(this).attr("data-tooltip", "mute");
+			}
+			else{
+				$(this).find("i")
+					.removeClass("mdi-av-volume-up")
+					.addClass("mdi-av-volume-off");
+				$("#volume-slider").slider({value: 0});
+				player.jPlayer("volume", 0);
+				$(this).attr("data-tooltip", "unmute");
+			}
+			mute = !mute;
+		})
+	});
+
+	var doPlay = function(){
+		$("#play-pause").attr("data-tooltip", "pause")
+			.find("i")
+			.removeClass("mdi-av-play-arrow")
+			.addClass("mdi-av-pause");
+		player.jPlayer("play");
+		playPauseBehavior = doPause;
+	}
+
+	var doPause = function(){
+		$("#play-pause").attr("data-tooltip", "play")
+			.find("i")
+			.removeClass("mdi-av-pause")
+			.addClass("mdi-av-play-arrow");
+		player.jPlayer("pause");
+		playPauseBehavior = doPlay;
+	}
+
+	function playMusic(index){
+		console.log("asd");
+		$(".playing")
+			.removeClass("playing")
+			.find("p:first-child")
+			.removeClass("pink-text text-lighten-1")
+			.addClass("white-text");
+		$("#playlist-queue li:nth-child(" + (index + 1) + ")")
+			.addClass("playing")
+			.find("p:first-child")
+			.removeClass("white-text")
+			.addClass("pink-text text-lighten-1");
+			console.log($($("#playlist-queue li:nth-child(" + (index + 1) + ")")[0]));
+		var music = playlist[index];
+		var duration = music.duration;
+		var title = music.title;
+		var link = music.link;
+		$("#song-art").attr("src", music.album_art);
+		$("#current-track-title").text(title);
+		$("#artist").text(music.artist.name);
+		$("#album").text(music.album.title);
+		$("#total-time").text($.jPlayer.convertTime(duration));
+		$("#track-slider").slider({
+			range: "max",
+			min: 0,
+			max: duration,
+			value: 0,
+			stop: function(ui, event){
+				player.jPlayer("pause");
+				var position = event.value;
+				var percentage = position / playlist[index].duration * 100;
+				player.jPlayer("playHead", percentage);
+				player.jPlayer("play");
+				isSliding = false;
+			},
+			start: function(ui, event){
+				isSliding = true;
+			}
+		});
+
+		player.jPlayer("setMedia", {
+			mp3: link
+		});
+		doPlay();
+		currentMusic = index;
+	}
+
+	function nextTrack(){
+		if(playlist.length > 0){
+			currentMusic++;
+			if(currentMusic >= playlist.length)
+				currentMusic = 0;
+			playMusic(currentMusic);
+		}
+	}
+
+	function prevTrack(){
+		if(playlist.length > 0){
+			currentMusic--;
+			if(currentMusic < 0)
+				currentMusic = playlist.length - 1;
+			playMusic(currentMusic);
+		}
+	}
+
+</script>

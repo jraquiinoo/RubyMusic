@@ -1,0 +1,127 @@
+<% content_for :title, "My playlists" %>
+<ul id="side-nav" class="side-nav grey darken-4" style="padding-top: 65px;">
+    <li class='bold-text'><a href="/dashboard" class="white-text">Dashboard</a></li>
+    <li class='bold-text'><a href="/playlist?id=<%= @user_library %>" class="white-text">My Library</a></li>
+    <li class='bold-text'><a href="/my_playlists" class="white-text">My Playlists</a></li>
+    <li class="li-divider" style="padding:0;"></li>
+    <li><a href="/logout" class="white-text">Log out</a></li>
+</ul>
+<div class="navbar-fixed">
+<nav class='pink'>
+	<div class='navbar-wrapper' style="padding: 0px 10px;">
+		<a href="/dashboard" class="brand-logo grey-text text-darken-4"><i class="mdi-hardware-headset" style="vertical-align: middle;"></i> <%= @username %></a>
+		<a href="#" id="sidenav-trigger" data-activates="side-nav" class="right black-text button-collapse show-on-large"><i class="mdi-navigation-menu"></i></a>
+	</div>
+</nav>
+</div>
+<div class="section">
+	<div id="wrapper">
+		<div class="section">
+			<div class="row">
+				<h5 class="pink-text">My playlists
+					<% if @playlists.present? && @playlists.size > 0 %>
+					<a class="waves-effect waves-light btn-flat modal-trigger grey-text right no-margin playlist-trigger" href="#create-playlist-dialog">
+						<i class="medium mdi-av-playlist-add"></i>
+					</a>
+					<% end %>
+				</h5>
+			</div>
+			<div class="row">
+				<% if @playlists.present? && @playlists.size > 0 %>
+					<% @playlists.each do |playlist|%>
+					<div class="col s12 m6 l4">
+						<div class="card small grey grey darken-3 waves-effect" style='margin-bottom: 2px; display: block;' onclick="location.assign('/playlist?id=<%= playlist[:id] %>');">
+							<div class="card-image valign-wrapper" style='width:100%;height: 70%;'>
+								<div style='position: relative; left: 50%; transform: translateX(-50%);'>
+									<i class="large mdi-av-album grey-text text-darken-1"></i>
+								</div>
+							</div>
+							<div class="blue darken-3" style="padding: 20px;height: 30%;">
+								<h6 class="white-text bold-text no-margin"><%= playlist[:name] %></h6>
+								<p class="grey-text text-lighten-2 no-margin">by <a href="#" class='grey-text text-lighten-1' style="text-transform: none;"><%= playlist[:song_count] %></a></p>	
+							</div>
+						</div>
+					</div>
+					<% end %>
+				<% else %>
+					<div class="row center-align" style="padding: 30px 0;">
+						<a class="waves-effect waves-light modal-trigger grey-text text-darken-3 no-margin playlist-trigger" href="#create-playlist-dialog">
+							<i class="mdi-av-playlist-add" style="font-size: 7rem;"></i>
+						</a>
+						<p class="grey-text text-darken-3 bold-text">You have no playlists</p>
+					</div>
+				<% end %>
+			</div>
+		</div>
+	</div>
+</div>
+<div id="create-playlist-dialog" class="grey darken-3 modal modal-fixed-footer" style="height: 280px;">
+    <div class="modal-content">
+    	<div class="row">
+    		<div class="col s12">
+    			<h5 class="pink-text" style="font-weight: bold;">Create playlist</h5>		
+    		</div>
+    	</div>
+    	<div class="row">
+    		<div class="col s12 input-field light">
+    			<%= form_tag('dashboard/create_playlist', method: :post, :id => "create-playlist-form") do %>
+    				<label for="playlist-title">Playlist name</label>
+		      		<input id="playlist-title" type="text" class="white-text" name="ptitle"/>
+		      		<input id="playlist-submit" type="submit" class="hidden"/>		
+		      	<% end %>
+    		</div>
+    	</div>
+    </div>
+    <div class="modal-footer right-align grey darken-4">
+    	<a href="#" class="grey-text text-lighten-3 waves-effect btn-flat modal-action modal-close">Cancel</a>
+    	<a href="#" onclick="$('#playlist-submit').click();" class="btn waves-effect modal-action">Create</a>
+    </div>
+</div>
+<script>
+
+	$(".playlist-trigger").leanModal();
+
+	$("#create-playlist-form").validate({
+		errorClass: "invalid",
+		validClass: "valid",
+		debug: true,
+		errorElement: "span",
+		rules:{
+			ptitle: {
+				required: true
+			}
+		},
+		messages: {
+			ptitle: {
+				required: "You must provide a name for your playlist"
+			}
+		},
+		submitHandler: function(form){
+			$.ajax({
+				url: $(form).attr("action"),
+				data: $(form).serialize(),
+				dataType: "json",
+				type: "post",
+				success: function(data, textStatus, jqXHR){ 
+					if(data.status == 1){
+						toast("Playlist of the same name already exists", 5000, "red");
+						$("#playlist-title").addClass("invalid");
+					} else{
+						console.log(data);
+						var pid = data.pid;
+						location.assign("/playlist?id=" + pid);
+					}
+				},
+				error: function(jqXHR, textStatus, errorThrown){
+					toast("An unknown error was encountered while trying to create your playlist", 1000, "orange");
+				}
+			});
+		}
+	});
+
+	$(document).ready(function(){
+		$("#sidenav-trigger").sideNav({
+			edge: "right"
+		});
+	})
+</script>

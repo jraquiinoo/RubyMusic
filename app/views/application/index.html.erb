@@ -1,0 +1,6 @@
+<% if @user_id.present? %>
+	<a href="/logout">Log out</a>
+<% else %>
+	<a href="/login">Log in</a>
+	<a href="/signup">Sign up</a>
+<% end %>

@@ -1,0 +1,303 @@
+<% content_for :title, "Dashboard" %>
+<ul id="side-nav" class="side-nav grey darken-4" style="padding-top: 65px;">
+    <li class='bold-text'><a href="/dashboard" class="white-text">Dashboard</a></li>
+    <li class='bold-text'><a href="/playlist?id=<%= @user_library %>" class="white-text">My Library</a></li>
+    <li class='bold-text'><a href="/my_playlists" class="white-text">My Playlists</a></li>
+    <li class="li-divider" style="padding:0;"></li>
+    <li><a href="/logout" class="white-text">Log out</a></li>
+</ul>
+<div class="navbar-fixed">
+<nav class='pink'>
+	<div class='navbar-wrapper' style="padding: 0px 10px;">
+		<a href="/dashboard" class="brand-logo grey-text text-darken-4"><i class="mdi-hardware-headset" style="vertical-align: middle;"></i> <%= @username %></a>
+		<a href="#" id="sidenav-trigger" data-activates="side-nav" class="right black-text button-collapse show-on-large"><i class="mdi-navigation-menu"></i></a>
+	</div>
+</nav>
+</div>
+<div class="section">
+<div id="wrapper">
+	<div class="section">
+		<div class="row">
+			<div class='col s12 m6'>
+				<div class="row">
+					<h5 class="pink-text" style="width: 100%;">
+						<a href="playlist?id=<%= @library[:id] %>" class="left pink-text">My Library</a>
+						<% if @library.present? && @library[:tracks].size > 0 %>
+						<a class="waves-effect waves-light btn-flat library-trigger modal-trigger grey-text right no-margin" href="#upload-dialog">
+							<i class="medium mdi-av-my-library-add"></i>
+						</a>
+						<% end %>
+					</h5>
+				</div>
+				<div class="row">
+					<% if @library.present? %>
+						<div class="col s12">
+							<% if @library[:tracks].size > 0 %>
+								<div class="card grey darken-3">
+									<% @library[:tracks].each do |music|%>
+										<div class="row no-margin waves-effect" style="border-bottom: 1px solid #212121; display: block;" onclick="location.assign('/playlist?id=<%= @library[:id] %>&lt=<%= music[:index] %>');">
+											<div class="col s4 l3 valign-wrapper grey darken-1 center-align" style='height: 100%;padding:0;'>
+												<% if music[:album_art].present? %>
+													<img src="<%= music[:album_art] %>" class="responsive-img"/>
+												<% else %>
+													<i class="medium mdi-av-album grey-text text-darken-3"></i>
+												<% end%>
+											</div>
+											<div class="col s8 l9" style='padding-top: 20px;'>
+												<h6 class="white-text bold-text no-margin"><%= music[:title] %></h6>
+												<p class="grey-text text-lighten-2 no-margin">by <a href="#" style="text-transform: none;"><%= music[:artist][:name] %></a></p>
+											</div>
+										</div>
+									<% end %>
+									<% if @library_size.present? %>
+										<% if @library_size > @library.size %>
+											<a href="playlist?id=<%= @library[:id] %>" class="waves-effect btn-flat no-margin center-align blue-text text-lighten-2" style='width: 100%'>
+												<i class='mdi-navigation-more-horiz'></i>
+											</a>
+										<% end %>
+									<% end %>
+								</div>
+							<% else %>
+								<div class="row center-align" style="padding: 30px 0;">
+									<a class="waves-effect waves-light library-trigger modal-trigger grey-text text-darken-3 no-margin" href="#upload-dialog">
+										<i class="mdi-av-my-library-add" style="font-size: 7rem;"></i>
+									</a>
+									<p class="grey-text text-darken-3 bold-text">Your library is empty</p>
+								</div>
+							<% end %>
+						</div>
+					<% end %>
+				</div>
+			</div>
+			<div class="col s12 m6">
+				<div class="row">
+					<h5 class="pink-text"><a href="/my_playlists" class='pink-text'>My playlists</a>
+						<% if @playlists.present? && @playlists.size > 0 %>
+					<a class="waves-effect waves-light btn-flat modal-trigger grey-text right no-margin playlist-trigger" href="#create-playlist-dialog">
+						<i class="medium mdi-av-playlist-add"></i>
+					</a>
+					<% end %>
+					</h5>
+				</div>
+				<div class="row">
+					<div class="col s12">
+						<% if @playlists.present? && @playlists.size > 0 %>
+							<div class="card grey darken-3">
+								<% @playlists.each do |playlist|%>
+									<div class="row no-margin waves-effect" style="border-bottom: 1px solid #212121; display: block;" onclick="location.assign('/playlist?id=<%= playlist[:id] %>');">
+										<div class="col s4 l3 valign-wrapper grey darken-1 center-align" style='height: 100%;'>
+												<i class="medium mdi-av-album grey-text text-darken-3"></i>
+											</div>
+											<div class="col s8 l9" style='padding-top: 20px;'>
+												<h6 class="white-text bold-text no-margin"><%= playlist[:name] %></h6>
+												<p class="grey-text text-lighten-2 no-margin"><%= playlist[:song_count] %> songs</p>
+											</div>
+									</div>
+								<% end %>
+								<% if @playlists_size.present? %>
+									<% if @playlists_size > @playlists.size %>
+										<a href="playlist?id=<%= @library[:id] %>" class="waves-effect btn-flat no-margin center-align blue-text text-lighten-2" style='width: 100%'>
+											<i class='mdi-navigation-more-horiz'></i>
+										</a>
+									<% end %>
+								<% end %>
+							</div>
+						<% else %>
+							<div class="row center-align" style="padding: 30px 0;">
+								<a class="waves-effect waves-light modal-trigger grey-text text-darken-3 no-margin playlist-trigger" href="#create-playlist-dialog">
+									<i class="mdi-av-playlist-add" style="font-size: 7rem;"></i>
+								</a>
+								<p class="grey-text text-darken-3 bold-text">You have no playlists</p>
+							</div>
+						<% end %>
+					</div>
+				</div>
+			</div>
+		</div>
+		<% if @recent.present? && @recent[:tracks].size > 0 %>
+		<div class="row">
+			<div class="row">
+				<div class="col s12">
+					<h5 class="pink-text">Recently added</h5>
+				</div>
+			</div>
+			<div class="row">
+			<% if @recent.present? %>
+				<% @recent[:tracks].each do |music|%>
+					<div class="col s12 m6 l4">
+						<div class="card small grey grey darken-3 waves-effect" style='margin-bottom: 2px; display: block;' onclick="location.assign('/playlist?id=<%= @recent[:id] %>&lt=<%= music[:index] %>&or=1');">
+							<div class="card-image valign-wrapper" style='width:100%;height: 70%;'>
+								<% if music[:album_art].present? %>
+									<img src="<%= music[:album_art] %>"/>
+								<% else %>
+									<div style='position: relative; left: 50%; transform: translateX(-50%);'>
+										<i class="large mdi-av-album grey-text text-darken-1"></i>
+									</div>
+								<% end %>
+							</div>
+							<div class="blue darken-3" style="padding: 20px;height: 30%;">
+								<h6 class="white-text bold-text no-margin"><%= music[:title] %></h6>
+								<p class="grey-text text-lighten-2 no-margin">by <a href="#" class='grey-text text-lighten-1' style="text-transform: none;"><%= music[:artist][:name] %></a></p>	
+							</div>
+						</div>
+					</div>
+				<% end %>
+			<% end %>
+			</div>
+		</div>
+		<% end %>
+	</div>
+</div>
+</div>
+<div id="upload-dialog" class="grey darken-3 modal modal-fixed-footer">
+		<div id="upload-placeholder" class="valign-wrapper center-align" style="width: 100%; height: 100%; position: absolute;">
+		<i class="large mdi-av-my-library-music grey-text text-darken-2" style="margin:auto;"></i>
+	</div>
+    <div class="modal-content">
+    	<div class="row">
+    		<div class="col s12">
+    			<h5 class="pink-text" style="font-weight: bold;">Add music to library</h5>		
+    		</div>
+    	</div>
+    	<div class="row">
+    		<div class="col s12">
+		      	<ul id="upload-list">
+		      	</ul>		
+    		</div>
+    	</div>
+      	<input id="fileupload" type="file" name="file" class="hidden" multiple/>
+    </div>
+    <div class="modal-footer right-align grey darken-4">
+    	<a href="#" class="grey-text text-lighten-3 waves-effect btn-flat modal-action modal-close" onclick="location.reload();">done</a>
+    	<a href="#" onclick="$('#fileupload').click();" class="btn waves-effect modal-action">Add <i class="mdi-editor-attach-file right"></i></a>
+    </div>
+</div>
+<div id="create-playlist-dialog" class="grey darken-3 modal modal-fixed-footer" style="height: 280px;">
+    <div class="modal-content">
+    	<div class="row">
+    		<div class="col s12">
+    			<h5 class="pink-text" style="font-weight: bold;">Create playlist</h5>		
+    		</div>
+    	</div>
+    	<div class="row">
+    		<div class="col s12 input-field light">
+    			<%= form_tag('dashboard/create_playlist', method: :post, :id => "create-playlist-form") do %>
+    				<label for="playlist-title">Playlist name</label>
+		      		<input id="playlist-title" type="text" class="white-text" name="ptitle"/>
+		      		<input id="playlist-submit" type="submit" class="hidden"/>		
+		      	<% end %>
+    		</div>
+    	</div>
+    </div>
+    <div class="modal-footer right-align grey darken-4">
+    	<a href="#" class="grey-text text-lighten-3 waves-effect btn-flat modal-action modal-close">Cancel</a>
+    	<a href="#" onclick="$('#playlist-submit').click();" class="btn waves-effect modal-action">Create</a>
+    </div>
+</div>
+<script>
+	$(".library-trigger").leanModal({
+		complete: function() { 
+			$("#upload-list").empty(); 
+			$("#upload-placeholder").removeClass("hidden");
+		}
+	});
+
+	$(".playlist-trigger").leanModal();
+
+	$("#create-playlist-form").validate({
+		errorClass: "invalid",
+		validClass: "valid",
+		debug: true,
+		errorElement: "span",
+		rules:{
+			ptitle: {
+				required: true
+			}
+		},
+		messages: {
+			ptitle: {
+				required: "You must provide a name for your playlist"
+			}
+		},
+		submitHandler: function(form){
+			$.ajax({
+				url: $(form).attr("action"),
+				data: $(form).serialize(),
+				dataType: "json",
+				type: "post",
+				success: function(data, textStatus, jqXHR){ 
+					if(data.status == 1){
+						toast("Playlist of the same name already exists", 5000, "red");
+						$("#playlist-title").addClass("invalid");
+					} else{
+						console.log(data);
+						var pid = data.pid;
+						location.assign("/playlist?id=" + pid);
+					}
+				},
+				error: function(jqXHR, textStatus, errorThrown){
+					toast("An unknown error was encountered while trying to create your playlist", 1000, "orange");
+				}
+			});
+		}
+	});
+
+	$(document).ready(function(){
+
+		$("#sidenav-trigger").sideNav({
+			edge: "right"
+		});
+
+		$("#fileupload").fileupload({
+			url: "/dashboard/upload",
+			type: "post",
+			dataType: "json",
+			acceptFileTypes: '/(\.|\/)(mp3|ogg|wav)$/i',
+			sequentialUploads: true,
+			add: function(e, data){
+				
+				if(!$("#upload-placeholder").hasClass("hidden"))
+					$("#upload-placeholder").addClass("hidden");
+				var filename = data.files[0].name;
+				var filesize = formatFileSize(data.files[0].size);
+
+				var newRow = $("<li style='padding-bottom: 15px'><p class='grey-text text-lighten-3'>" + filename + " (" + filesize + ")</p>" + 
+					"<div class='progress'><div class='determinate' style='width: 0%'></div></div></li>");
+				
+				$("#upload-list").append(newRow);
+				data.files[0].row = newRow;
+				e.context = newRow;
+				var jqXHR = data.submit()
+						.success(function(result, textStatus, jqXHR){
+							console.log(result);
+						})
+						.fail(function(jqXHR, textStatus, errorThrown){
+						console.log(textStatus);
+						})
+						.progress(function(e, data){
+							console.log(data);
+						});
+			},
+			progress: function(e, data){
+
+				var progress = parseInt(data.loaded / data.total * 100, 10);
+				var row = data.files[0].row;
+				row.find(".determinate").css("width", progress + "%");
+			},
+			always: function(e, data){
+
+				var result = data.result;
+				var row = data.files[0].row;
+				if(result.status == 0){
+					row.find(".progress").addClass("success");
+				}
+				else{
+					row.find(".progress").addClass("fail");
+					if(typeof result.error !== "undefined"){
+						row.append($("<span class='red-text' style='margin-bottom: 5px;font-weight:bold;font-size:0.9rem;'>" + result.error + "</span>"));
+					}
+				}
+			}
+		});
+	});
+</script>

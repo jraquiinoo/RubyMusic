@@ -1,0 +1,88 @@
+// Place all the styles related to the Home controller here.
+// They will automatically be included in application.css.
+// You can use Sass (SCSS) here: http://sass-lang.com/
+
+@import "jquery-ui.slider";
+
+#upload-list li, #library-tracks li{
+	border-bottom: 1px solid #757575;
+}
+
+@media(min-width: 993px){
+	#wrapper{
+		width: 80%;
+		margin: auto;	
+	}
+}
+
+@media(min-width: 602px){
+	#wrapper{
+		width: 90%;
+		margin: auto;
+	}
+}
+
+#playlist-queue, #side-nav{
+	padding: 65px 0px 40px 0px;
+	overflow:auto;
+}
+
+#playlist-queue li{
+	border-bottom: 1px solid rgba(255,255,255,0.1);
+	padding: 10px 30px;
+}
+
+ #side-nav li{
+ 	padding: 20px 30px;
+ }
+
+#side-nav li a{
+	width: 100%;
+}
+#playlist-queue li:hover, #side-nav li:hover{
+	background-color: rgba(255, 255, 255, 0.1);
+}
+
+main{
+	position: fixed;
+	top: 0;
+	left: 0;
+	bottom: 0;
+	right: 0;
+}
+
+#player-controls{
+	position: fixed;
+	left: 0;
+	bottom: 0;
+	right: 0;
+	z-index: 1;
+	padding: 30px;
+	background-color: #263238;
+}
+
+@media(min-width: 993px){
+	main{
+		padding-left: 350px;
+	}
+
+	#player-controls{
+		left: 350px;
+	}
+}
+
+.li-divider{
+	background-color: rgba(255,255,255,0.1);
+	height: 2px;
+	width: 100%;
+}
+
+
+#playlist-queue-placeholder{
+	height: 100%; width: 100%; display: table;
+}
+
+.sortable-placeholder{
+	background-color: #212121;
+	height: 65px;
+}
